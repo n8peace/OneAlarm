@@ -1,0 +1,23 @@
+# Global owners
+* @natep
+
+# Supabase functions
+supabase/functions/ @natep
+
+# Database migrations
+supabase/migrations/ @natep
+
+# CI/CD workflows
+.github/workflows/ @natep
+
+# Scripts
+scripts/ @natep
+
+# Documentation
+docs/ @natep
+
+# Configuration files
+*.config.js @natep
+*.config.ts @natep
+package.json @natep
+supabase/config.toml @natep 

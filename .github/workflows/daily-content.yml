@@ -1,0 +1,35 @@
+name: Daily Content Cron
+on:
+  schedule:
+    - cron: '3 * * * *'  # Every hour at 3 minutes past
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  call-function:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Daily Content Function
+        run: |
+          echo "🕐 Calling daily content function at $(date)"
+          
+          # Call the Supabase function
+          response=$(curl -s -w "\n%{http_code}" -X POST ${{ secrets.SUPABASE_URL }}/functions/v1/daily-content \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -d '{}')
+          
+          # Extract response body and status code
+          http_code=$(echo "$response" | tail -n1)
+          response_body=$(echo "$response" | head -n -1)
+          
+          echo "📊 Response Status: $http_code"
+          echo "📄 Response Body: $response_body"
+          
+          # Check if the call was successful
+          if [ "$http_code" -eq 200 ]; then
+            echo "✅ Function executed successfully!"
+          else
+            echo "❌ Function call failed with status $http_code"
+            echo "Response: $response_body"
+            exit 1
+          fi 

@@ -1,0 +1,33 @@
+{
+  "automated_execution": {
+    "service": "cron-job.org",
+    "status": "active",
+    "schedule": "3 * * * *",
+    "function": "daily-content",
+    "description": "Automated daily content collection every hour at 3 minutes past the hour"
+  },
+  "audio_generation": {
+    "service": "cron-job.org", 
+    "status": "active",
+    "schedule": "*/1 * * * *",
+    "function": "generate-alarm-audio",
+    "description": "Process audio generation queue every 1 minute for Phase 1 scaling"
+  },
+  "monitoring": {
+    "health_check_function": "check_daily_content_health",
+    "logs_table": "logs",
+    "data_table": "daily_content"
+  },
+  "configuration": {
+    "url": "https://joyavvleaxqzksopnmjs.supabase.co/functions/v1/daily-content",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer [SERVICE_ROLE_KEY]"
+    },
+    "body": "{}",
+    "retries": 3,
+    "retry_delay": "5 minutes",
+    "timeout": "30 seconds"
+  }
+} 

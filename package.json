@@ -1,0 +1,56 @@
+{
+  "name": "onealarm-by-sunriseai",
+  "version": "1.0.0",
+  "description": "A Supabase-based alarm system that generates personalized daily content and audio for users",
+  "main": "index.js",
+  "scripts": {
+    "dev": "supabase start",
+    "build": "supabase functions build",
+    "deploy": "supabase functions deploy",
+    "db:push": "supabase db push",
+    "db:reset": "supabase db reset",
+    "db:diff": "supabase db diff",
+    "db:lint": "supabase db lint",
+    "setup:cron": "echo 'See docs/CRON_SETUP.md for cron job setup instructions'",
+    "setup:email": "echo 'See docs/EMAIL_SETUP.md for email setup instructions'",
+    "test:functions": "./scripts/test-system.sh audio",
+    "test:create-user": "./scripts/create-test-user.sh",
+    "test:alarm-audio": "./scripts/test-system.sh audio",
+    "test:queue": "./scripts/test-system.sh queue",
+    "test:cleanup": "./scripts/test-system.sh cleanup",
+    "test:swiftui": "./scripts/test-system.sh swiftui",
+    "test:timing": "./scripts/test-system.sh timing",
+    "deploy:timing": "echo 'See docs/TIMING_OPTIMIZATION_SUMMARY.md for timing optimization deployment'",
+    "deploy:phase1": "echo 'See docs/CI_CD_PREPARATION_SUMMARY.md for phase 1 deployment'",
+    "monitor:system": "./scripts/monitor-system.sh",
+    "check:status": "./scripts/check-system-status.sh",
+    "setup:storage": "./scripts/setup-storage.sh",
+    "upload:background": "./scripts/upload-background-audio.sh"
+  },
+  "keywords": [
+    "supabase",
+    "edge-functions",
+    "alarm",
+    "audio",
+    "content-generation",
+    "cron-jobs"
+  ],
+  "author": "SunriseAI",
+  "license": "MIT",
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "typescript": "^5.3.0",
+    "@types/node": "^20.10.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sunriseai/onealarm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sunriseai/onealarm/issues"
+  },
+  "homepage": "https://github.com/sunriseai/onealarm#readme"
+} 

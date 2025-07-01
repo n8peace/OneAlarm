@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+This is a production environment. Whenever deploying, check what the risks are to production. Confirm these risks and wait for the go ahead.

@@ -1,0 +1,142 @@
+name: Migrate Cron Jobs
+
+on:
+  schedule:
+    # Daily content generation - runs at 2 AM UTC (10 PM EST)
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      job_type:
+        description: 'Type of cron job to run'
+        required: true
+        default: 'daily-content'
+        type: choice
+        options:
+        - daily-content
+        - cleanup-audio
+        - check-triggers
+
+jobs:
+  daily-content:
+    if: github.event.inputs.job_type == 'daily-content' || github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Trigger daily content generation
+      run: |
+        echo "📅 Triggering daily content generation..."
+        
+        # Call the daily-content function
+        response=$(curl -s -w "\n%{http_code}" -X POST ${{ secrets.SUPABASE_URL_PROD }}/functions/v1/daily-content \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_PROD }}" \
+          -H "Content-Type: application/json" \
+          -d '{"force": true}')
+        
+        http_code=$(echo "$response" | tail -n1)
+        response_body=$(echo "$response" | head -n -1)
+        
+        if [ "$http_code" = "200" ]; then
+          echo "✅ Daily content generation triggered successfully"
+          echo "Response: $response_body"
+        else
+          echo "❌ Daily content generation failed (HTTP $http_code)"
+          echo "Response: $response_body"
+          exit 1
+        fi
+        
+    - name: Send notification
+      run: |
+        echo "📧 Sending daily content notification..."
+        # Add notification logic here
+        echo "✅ Daily content generation completed"
+        
+  cleanup-audio:
+    if: github.event.inputs.job_type == 'cleanup-audio'
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Trigger audio cleanup
+      run: |
+        echo "🧹 Triggering audio cleanup..."
+        
+        # Call the cleanup-audio-files function
+        response=$(curl -s -w "\n%{http_code}" -X POST ${{ secrets.SUPABASE_URL_PROD }}/functions/v1/cleanup-audio-files \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_PROD }}" \
+          -H "Content-Type: application/json")
+        
+        http_code=$(echo "$response" | tail -n1)
+        response_body=$(echo "$response" | head -n -1)
+        
+        if [ "$http_code" = "200" ]; then
+          echo "✅ Audio cleanup triggered successfully"
+          echo "Response: $response_body"
+        else
+          echo "❌ Audio cleanup failed (HTTP $http_code)"
+          echo "Response: $response_body"
+          exit 1
+        fi
+        
+    - name: Send notification
+      run: |
+        echo "📧 Sending cleanup notification..."
+        # Add notification logic here
+        echo "✅ Audio cleanup completed"
+        
+  check-triggers:
+    if: github.event.inputs.job_type == 'check-triggers'
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Trigger trigger check
+      run: |
+        echo "🔍 Triggering trigger check..."
+        
+        # Call the check-triggers function
+        response=$(curl -s -w "\n%{http_code}" -X POST ${{ secrets.SUPABASE_URL_PROD }}/functions/v1/check-triggers \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_PROD }}" \
+          -H "Content-Type: application/json")
+        
+        http_code=$(echo "$response" | tail -n1)
+        response_body=$(echo "$response" | head -n -1)
+        
+        if [ "$http_code" = "200" ]; then
+          echo "✅ Trigger check completed successfully"
+          echo "Response: $response_body"
+        else
+          echo "❌ Trigger check failed (HTTP $http_code)"
+          echo "Response: $response_body"
+          exit 1
+        fi
+        
+    - name: Send notification
+      run: |
+        echo "📧 Sending trigger check notification..."
+        # Add notification logic here
+        echo "✅ Trigger check completed" 
