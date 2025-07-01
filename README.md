@@ -224,4 +224,43 @@ OneAlarm is a **fully operational** personalized alarm system that:
 - ✅ **Processes alarms efficiently** with high-performance queue management
 - ✅ **Provides personalized content** based on user preferences
 - ✅ **Maintains high reliability** with comprehensive error handling
-- ✅ **Handles multiple timezones** with accurate scheduling and DST support 
+- ✅ **Handles multiple timezones** with accurate scheduling and DST support
+
+# OneAlarm
+
+AI-powered alarm clock with personalized content generation.
+
+## Features
+
+- **Personalized Content**: AI-generated news, weather, and sports updates
+- **Smart Audio Generation**: Dynamic alarm audio with TTS and background music
+- **Multi-Environment Support**: Development and production configurations
+- **CI/CD Pipeline**: Automated testing, deployment, and monitoring
+- **Cron Job Migration**: GitHub Actions-based scheduled tasks
+
+## Quick Start
+
+1. Clone the repository
+2. Set up environment variables
+3. Deploy to Supabase
+4. Configure GitHub environments
+
+## Development
+
+- **Development Environment**: Automated deployment on `develop` branch
+- **Production Environment**: Manual deployment on `main` branch
+- **CI/CD**: GitHub Actions workflows for testing and deployment
+
+## Status
+
+✅ **CI/CD Ready** - Repository migrated to GitHub with full automation
+✅ **Environment Setup** - Development environment configured
+🔄 **Production Setup** - Pending (to be configured later)
+
+## Documentation
+
+See the `docs/` directory for comprehensive documentation including:
+- GitHub migration guide
+- CI/CD implementation scope
+- Database schema and migrations
+- API documentation 
