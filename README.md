@@ -230,6 +230,26 @@ OneAlarm is a **fully operational** personalized alarm system that:
 
 AI-powered alarm clock with personalized content generation.
 
+## 🚀 **Quick Reference**
+
+**Repository**: [n8peace/OneAlarm](https://github.com/n8peace/OneAlarm)  
+**Status**: ✅ CI/CD Ready with GitHub Actions  
+**Environment**: Development configured, Production pending
+
+### **Quick Start (New Chat Session)**
+```bash
+git clone https://github.com/n8peace/OneAlarm.git
+cd OneAlarm
+git pull origin main
+```
+
+### **Key Documentation**
+- [GitHub Quick Start Guide](docs/GITHUB_QUICK_START.md) - Connect to repo in new sessions
+- [GitHub Migration Guide](docs/GITHUB_MIGRATION_GUIDE.md) - Complete setup guide
+- [CI/CD Implementation](docs/CI_CD_IMPLEMENTATION_SCOPE.md) - Technical details
+
+---
+
 ## Features
 
 - **Personalized Content**: AI-generated news, weather, and sports updates
