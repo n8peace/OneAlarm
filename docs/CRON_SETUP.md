@@ -42,29 +42,29 @@ Your OneAlarm system is now running automatically using **cron-job.org**, a reli
 - **Alerts**: Email notifications on failures
 
 ### **Supabase Dashboard**
-- **Function Logs**: https://supabase.com/dashboard/project/joyavvleaxqzksopnmjs/functions
+- **Function Logs**: https://supabase.com/dashboard/project/YOUR_PROJECT_REF/functions
 - **Database**: Check `daily_content` and `audio_generation_queue` tables
 - **Logs**: Monitor function execution logs
 
 ## **Configuration Details**
 
 ### **Daily Content Cron Job**
-- **URL**: `https://joyavvleaxqzksopnmjs.supabase.co/functions/v1/daily-content`
+- **URL**: `https://YOUR_PROJECT_REF.supabase.co/functions/v1/daily-content`
 - **Method**: `POST`
 - **Headers**: 
   - `Content-Type: application/json`
-  - `Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpveWF2dmxlYXhxemtzb3BubWpzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDE5MDc2NSwiZXhwIjoyMDY1NzY2NzY1fQ.6Mf8KFY_9hXriVbYe1kZpKd4c_4m-3j2y6r_Ds4i4og`
+  - `Authorization: Bearer YOUR_SERVICE_ROLE_KEY`
 - **Body**: `{}`
 - **Schedule**: `3 * * * *` (Every hour at minute 3)
 - **Retries**: 3 attempts with 5-minute delays
 - **Timeout**: 30 seconds
 
 ### **Audio Generation Cron Job**
-- **URL**: `https://joyavvleaxqzksopnmjs.supabase.co/functions/v1/generate-alarm-audio`
+- **URL**: `https://YOUR_PROJECT_REF.supabase.co/functions/v1/generate-alarm-audio`
 - **Method**: `POST`
 - **Headers**: 
   - `Content-Type: application/json`
-  - `Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpveWF2dmxlYXhxemtzb3BubWpzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDE5MDc2NSwiZXhwIjoyMDY1NzY2NzY1fQ.6Mf8KFY_9hXriVbYe1kZpKd4c_4m-3j2y6r_Ds4i4og`
+  - `Authorization: Bearer YOUR_SERVICE_ROLE_KEY`
 - **Body**: `{}` (Function processes queue automatically)
 - **Schedule**: `* * * * *` (Every 1 minute)
 - **Retries**: 3 attempts with 5-minute delays
@@ -207,17 +207,14 @@ supabase functions deploy generate-alarm-audio
 
 # Set up the audio generation cron job
 # Add to cron-job.org with schedule: */15 * * * *
-# URL: https://joyavvleaxqzksopnmjs.supabase.co/functions/v1/generate-alarm-audio
+# URL: https://YOUR_PROJECT_REF.supabase.co/functions/v1/generate-alarm-audio
 ```
 
 ## **Service Role Key**
 
-**Current Service Role Key** (for reference):
-```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpveWF2dmxlYXhxemtzb3BubWpzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDE5MDc2NSwiZXhwIjoyMDY1NzY2NzY1fQ.6Mf8KFY_9hXriVbYe1kZpKd4c_4m-3j2y6r_Ds4i4og
-```
+**Important**: Replace `YOUR_SERVICE_ROLE_KEY` with your actual service role key from Supabase dashboard.
 
-**Important**: Keep this key secure and never expose it in client-side code.
+**Security Note**: Never expose service role keys in client-side code or public repositories. Always use environment variables or secure secret management.
 
 ---
 
