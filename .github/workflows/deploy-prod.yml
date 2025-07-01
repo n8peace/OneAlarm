@@ -35,13 +35,13 @@ jobs:
       run: |
         echo "🔍 Validating production environment variables..."
         required_vars=(
-          "SUPABASE_URL"
-          "SUPABASE_SERVICE_ROLE_KEY"
-          "OPENAI_API_KEY"
-          "NEWSAPI_KEY"
-          "SPORTSDB_API_KEY"
-          "RAPIDAPI_KEY"
-          "ABSTRACT_API_KEY"
+          "SUPABASE_URL_PROD"
+          "SUPABASE_SERVICE_ROLE_KEY_PROD"
+          "OPENAI_API_KEY_PROD"
+          "NEWSAPI_KEY_PROD"
+          "SPORTSDB_API_KEY_PROD"
+          "RAPIDAPI_KEY_PROD"
+          "ABSTRACT_API_KEY_PROD"
         )
         
         for var in "${required_vars[@]}"; do
@@ -80,13 +80,13 @@ jobs:
       run: |
         echo "🔧 Setting environment variables..."
         supabase secrets set --project-ref ${{ secrets.SUPABASE_PROD_PROJECT_REF }} \
-          SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
-          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }} \
-          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
-          NEWSAPI_KEY=${{ secrets.NEWSAPI_KEY }} \
-          SPORTSDB_API_KEY=${{ secrets.SPORTSDB_API_KEY }} \
-          RAPIDAPI_KEY=${{ secrets.RAPIDAPI_KEY }} \
-          ABSTRACT_API_KEY=${{ secrets.ABSTRACT_API_KEY }}
+          SUPABASE_URL=${{ secrets.SUPABASE_URL_PROD }} \
+          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY_PROD }} \
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY_PROD }} \
+          NEWSAPI_KEY=${{ secrets.NEWSAPI_KEY_PROD }} \
+          SPORTSDB_API_KEY=${{ secrets.SPORTSDB_API_KEY_PROD }} \
+          RAPIDAPI_KEY=${{ secrets.RAPIDAPI_KEY_PROD }} \
+          ABSTRACT_API_KEY=${{ secrets.ABSTRACT_API_KEY_PROD }}
           
     - name: Run health checks
       run: |
@@ -94,8 +94,8 @@ jobs:
         
         # Test daily-content function
         echo "Testing daily-content function..."
-        response=$(curl -s -w "\n%{http_code}" -X GET ${{ secrets.SUPABASE_URL }}/functions/v1/daily-content \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
+        response=$(curl -s -w "\n%{http_code}" -X GET ${{ secrets.SUPABASE_URL_PROD }}/functions/v1/daily-content \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_PROD }}")
         
         http_code=$(echo "$response" | tail -n1)
         if [ "$http_code" = "200" ]; then
@@ -107,8 +107,8 @@ jobs:
         
         # Test generate-alarm-audio function
         echo "Testing generate-alarm-audio function..."
-        response=$(curl -s -w "\n%{http_code}" -X GET ${{ secrets.SUPABASE_URL }}/functions/v1/generate-alarm-audio \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
+        response=$(curl -s -w "\n%{http_code}" -X GET ${{ secrets.SUPABASE_URL_PROD }}/functions/v1/generate-alarm-audio \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_PROD }}")
         
         http_code=$(echo "$response" | tail -n1)
         if [ "$http_code" = "200" ]; then
@@ -120,8 +120,8 @@ jobs:
         
         # Test database connectivity
         echo "Testing database connectivity..."
-        response=$(curl -s -w "\n%{http_code}" -X GET ${{ secrets.SUPABASE_URL }}/rest/v1/users?select=count \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
+        response=$(curl -s -w "\n%{http_code}" -X GET ${{ secrets.SUPABASE_URL_PROD }}/rest/v1/users?select=count \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_PROD }}")
         
         http_code=$(echo "$response" | tail -n1)
         if [ "$http_code" = "200" ]; then
