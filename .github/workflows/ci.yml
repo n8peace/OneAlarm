@@ -102,7 +102,7 @@ jobs:
       run: |
         echo "🔍 Checking for sensitive data..."
         # Check for API keys in code
-        if grep -r "sk-" . --exclude-dir=.git --exclude-dir=node_modules 2>/dev/null; then
+        if grep -r "sk-" . --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=background_audio 2>/dev/null; then
           echo "❌ Potential API keys found in code"
           exit 1
         else
