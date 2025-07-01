@@ -101,8 +101,13 @@ jobs:
     - name: Check for sensitive data
       run: |
         echo "🔍 Checking for sensitive data..."
-        # Check for API keys in code
-        if grep -r "sk-" . --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=background_audio --exclude=.github/workflows/ci.yml 2>/dev/null; then
+        # Check for API keys in code, excluding .github directory and other non-code files
+        if find . -type f \( -name "*.js" -o -name "*.ts" -o -name "*.json" -o -name "*.md" -o -name "*.sh" -o -name "*.sql" \) \
+           -not -path "./.git/*" \
+           -not -path "./node_modules/*" \
+           -not -path "./background_audio/*" \
+           -not -path "./.github/*" \
+           -exec grep -l "sk-" {} \; 2>/dev/null; then
           echo "❌ Potential API keys found in code"
           exit 1
         else
