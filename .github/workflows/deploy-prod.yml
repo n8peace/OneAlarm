@@ -33,10 +33,7 @@ jobs:
         curl -L https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar xz
         mv supabase $HOME/.local/bin/
         chmod +x $HOME/.local/bin/supabase
-        # Add to PATH for current session
-        export PATH="$HOME/.local/bin:$PATH"
-        # Verify installation
-        supabase --version
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
         
     - name: Validate environment variables
       run: |
@@ -104,7 +101,6 @@ jobs:
     - name: Link to production project
       run: |
         echo "🔗 Linking to production Supabase project..."
-        export PATH="$HOME/.local/bin:$PATH"
         supabase link --project-ref ${{ secrets.SUPABASE_PROD_PROJECT_REF }}
         
     - name: Create backup
@@ -118,19 +114,16 @@ jobs:
     - name: Deploy database migrations
       run: |
         echo "🗄️ Deploying database migrations..."
-        export PATH="$HOME/.local/bin:$PATH"
         supabase db push
         
     - name: Deploy Edge Functions
       run: |
         echo "⚡ Deploying Edge Functions..."
-        export PATH="$HOME/.local/bin:$PATH"
         supabase functions deploy --project-ref ${{ secrets.SUPABASE_PROD_PROJECT_REF }}
         
     - name: Set environment variables
       run: |
         echo "🔧 Setting environment variables..."
-        export PATH="$HOME/.local/bin:$PATH"
         supabase secrets set --project-ref ${{ secrets.SUPABASE_PROD_PROJECT_REF }} \
           SUPABASE_URL=${{ secrets.SUPABASE_URL_PROD }} \
           SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY_PROD }} \
