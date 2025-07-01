@@ -7,15 +7,17 @@ on:
 jobs:
   call-function:
     runs-on: ubuntu-latest
+    environment: production  # Add environment specification to access secrets
+    
     steps:
       - name: Call Daily Content Function
         run: |
           echo "🕐 Calling daily content function at $(date)"
           
           # Call the Supabase function
-          response=$(curl -s -w "\n%{http_code}" -X POST ${{ secrets.SUPABASE_URL }}/functions/v1/daily-content \
+          response=$(curl -s -w "\n%{http_code}" -X POST ${{ secrets.SUPABASE_URL_PROD }}/functions/v1/daily-content \
             -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_PROD }}" \
             -d '{}')
           
           # Extract response body and status code

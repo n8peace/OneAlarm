@@ -42,16 +42,24 @@ jobs:
           "SPORTSDB_API_KEY_PROD"
           "RAPIDAPI_KEY_PROD"
           "ABSTRACT_API_KEY_PROD"
+          "SUPABASE_PROD_PROJECT_REF"
         )
         
+        missing_vars=()
         for var in "${required_vars[@]}"; do
           if [ -z "${!var}" ]; then
             echo "❌ Missing required environment variable: $var"
-            exit 1
+            missing_vars+=("$var")
           else
             echo "✅ $var is set"
           fi
         done
+        
+        if [ ${#missing_vars[@]} -gt 0 ]; then
+          echo "❌ Missing environment variables: ${missing_vars[*]}"
+          echo "Please configure these secrets in GitHub repository settings under Environments > Production"
+          exit 1
+        fi
         
     - name: Link to production project
       run: |
