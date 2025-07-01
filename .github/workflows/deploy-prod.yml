@@ -28,12 +28,15 @@ jobs:
         
     - name: Install Supabase CLI
       run: |
-        # Install Supabase CLI using the official method
-        curl -fsSL https://supabase.com/install.sh | sh
+        # Install Supabase CLI by downloading the binary directly
+        mkdir -p $HOME/.local/bin
+        curl -L https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar xz
+        mv supabase $HOME/.local/bin/
+        chmod +x $HOME/.local/bin/supabase
         # Add to PATH for current session
         export PATH="$HOME/.local/bin:$PATH"
         # Verify installation
-        $HOME/.local/bin/supabase --version
+        supabase --version
         
     - name: Validate environment variables
       run: |
