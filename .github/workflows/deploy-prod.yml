@@ -30,10 +30,27 @@ jobs:
       run: |
         # Install Supabase CLI by downloading the binary directly
         mkdir -p $HOME/.local/bin
+        
+        # Create temporary directory for download
+        TEMP_DIR=$(mktemp -d)
+        cd $TEMP_DIR
+        
+        # Download and extract to temporary directory
         curl -L https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar xz
-        mv supabase $HOME/.local/bin/
+        
+        # Move to final location (overwrite if exists)
+        mv -f supabase $HOME/.local/bin/
         chmod +x $HOME/.local/bin/supabase
+        
+        # Clean up temporary directory
+        cd -
+        rm -rf $TEMP_DIR
+        
+        # Add to PATH
         echo "$HOME/.local/bin" >> $GITHUB_PATH
+        
+        # Verify installation
+        $HOME/.local/bin/supabase --version
         
     - name: Validate environment variables
       run: |
