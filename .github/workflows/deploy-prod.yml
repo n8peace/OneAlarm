@@ -34,32 +34,65 @@ jobs:
     - name: Validate environment variables
       run: |
         echo "🔍 Validating production environment variables..."
-        required_vars=(
-          "SUPABASE_URL_PROD"
-          "SUPABASE_SERVICE_ROLE_KEY_PROD"
-          "OPENAI_API_KEY_PROD"
-          "NEWSAPI_KEY_PROD"
-          "SPORTSDB_API_KEY_PROD"
-          "RAPIDAPI_KEY_PROD"
-          "ABSTRACT_API_KEY_PROD"
-          "SUPABASE_PROD_PROJECT_REF"
-        )
         
-        missing_vars=()
-        for var in "${required_vars[@]}"; do
-          if [ -z "${!var}" ]; then
-            echo "❌ Missing required environment variable: $var"
-            missing_vars+=("$var")
-          else
-            echo "✅ $var is set"
-          fi
-        done
-        
-        if [ ${#missing_vars[@]} -gt 0 ]; then
-          echo "❌ Missing environment variables: ${missing_vars[*]}"
-          echo "Please configure these secrets in GitHub repository settings under Environments > Production"
+        # Check each secret directly
+        if [ -z "${{ secrets.SUPABASE_URL_PROD }}" ]; then
+          echo "❌ Missing required environment variable: SUPABASE_URL_PROD"
           exit 1
+        else
+          echo "✅ SUPABASE_URL_PROD is set"
         fi
+        
+        if [ -z "${{ secrets.SUPABASE_SERVICE_ROLE_KEY_PROD }}" ]; then
+          echo "❌ Missing required environment variable: SUPABASE_SERVICE_ROLE_KEY_PROD"
+          exit 1
+        else
+          echo "✅ SUPABASE_SERVICE_ROLE_KEY_PROD is set"
+        fi
+        
+        if [ -z "${{ secrets.OPENAI_API_KEY_PROD }}" ]; then
+          echo "❌ Missing required environment variable: OPENAI_API_KEY_PROD"
+          exit 1
+        else
+          echo "✅ OPENAI_API_KEY_PROD is set"
+        fi
+        
+        if [ -z "${{ secrets.NEWSAPI_KEY_PROD }}" ]; then
+          echo "❌ Missing required environment variable: NEWSAPI_KEY_PROD"
+          exit 1
+        else
+          echo "✅ NEWSAPI_KEY_PROD is set"
+        fi
+        
+        if [ -z "${{ secrets.SPORTSDB_API_KEY_PROD }}" ]; then
+          echo "❌ Missing required environment variable: SPORTSDB_API_KEY_PROD"
+          exit 1
+        else
+          echo "✅ SPORTSDB_API_KEY_PROD is set"
+        fi
+        
+        if [ -z "${{ secrets.RAPIDAPI_KEY_PROD }}" ]; then
+          echo "❌ Missing required environment variable: RAPIDAPI_KEY_PROD"
+          exit 1
+        else
+          echo "✅ RAPIDAPI_KEY_PROD is set"
+        fi
+        
+        if [ -z "${{ secrets.ABSTRACT_API_KEY_PROD }}" ]; then
+          echo "❌ Missing required environment variable: ABSTRACT_API_KEY_PROD"
+          exit 1
+        else
+          echo "✅ ABSTRACT_API_KEY_PROD is set"
+        fi
+        
+        if [ -z "${{ secrets.SUPABASE_PROD_PROJECT_REF }}" ]; then
+          echo "❌ Missing required environment variable: SUPABASE_PROD_PROJECT_REF"
+          exit 1
+        else
+          echo "✅ SUPABASE_PROD_PROJECT_REF is set"
+        fi
+        
+        echo "✅ All required environment variables are set"
         
     - name: Link to production project
       run: |
