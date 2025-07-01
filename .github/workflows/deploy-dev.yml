@@ -132,8 +132,8 @@ jobs:
     - name: Deploy database migrations
       run: |
         echo "🗄️ Deploying database migrations..."
-        # Use project reference to avoid direct database connection issues
-        supabase db push --project-ref ${{ secrets.SUPABASE_DEV_PROJECT_REF }}
+        # The project is already linked, so we can push directly
+        supabase db push --linked
         
     - name: Deploy Edge Functions
       run: |
