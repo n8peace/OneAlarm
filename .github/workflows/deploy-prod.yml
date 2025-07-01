@@ -140,8 +140,9 @@ jobs:
     - name: Deploy database migrations
       run: |
         echo "🗄️ Deploying database migrations..."
-        # The project is already linked, so we can push directly
-        supabase db push --linked
+        echo "⚠️ Skipping database migrations for now - will be handled manually"
+        # TODO: Fix database connection issue
+        # supabase db push --linked
         
     - name: Deploy Edge Functions
       run: |
