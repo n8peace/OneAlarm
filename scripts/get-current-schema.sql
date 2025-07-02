@@ -67,4 +67,13 @@ LEFT JOIN information_schema.key_column_usage kcu
 LEFT JOIN information_schema.check_constraints cc 
     ON tc.constraint_name = cc.constraint_name
 WHERE tc.table_schema = 'public'
-ORDER BY tc.table_name, tc.constraint_name; 
+ORDER BY tc.table_name, tc.constraint_name;
+
+-- Get schema for all critical tables
+\d+ users;
+\d+ user_preferences;
+\d+ alarms;
+\d+ daily_content;
+\d+ audio;
+\d+ audio_files;
+\d+ logs; 

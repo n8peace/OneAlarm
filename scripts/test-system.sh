@@ -169,6 +169,7 @@ create_test_alarm() {
     "alarm_date": "$alarm_date",
     "alarm_time_local": "$alarm_time",
     "alarm_timezone": "$timezone",
+    "timezone_at_creation": "$timezone",
     "active": true
 }
 EOF
