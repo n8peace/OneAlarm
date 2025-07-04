@@ -26,21 +26,23 @@ show_usage() {
 }
 
 # Environment URLs and keys
-DEV_URL="${DEV_URL:-https://joyavvleaxqzksopnmjs.supabase.co}"
+DEV_URL="${DEV_URL:-}"
 DEV_KEY="${DEV_KEY:-}"
 
-PROD_URL="${PROD_URL:-https://joyavvleaxqzksopnmjs.supabase.co}"
+PROD_URL="${PROD_URL:-}"
 PROD_KEY="${PROD_KEY:-}"
 
 # Validate environment variables
-if [ -z "$DEV_KEY" ] || [ -z "$PROD_KEY" ]; then
+if [ -z "$DEV_URL" ] || [ -z "$DEV_KEY" ] || [ -z "$PROD_URL" ] || [ -z "$PROD_KEY" ]; then
     echo -e "${RED}❌ Error: Missing required environment variables${NC}"
     echo "Please set the following environment variables:"
+    echo "  DEV_URL - Development environment URL"
     echo "  DEV_KEY - Development environment service role key"
+    echo "  PROD_URL - Production environment URL"
     echo "  PROD_KEY - Production environment service role key"
     echo ""
     echo "Example:"
-    echo "  DEV_KEY=your_dev_key PROD_KEY=your_prod_key ./scripts/compare-rls-environments.sh"
+    echo "  DEV_URL=https://xqkmpkfqoisqzznnvlox.supabase.co DEV_KEY=your_dev_key PROD_URL=https://joyavvleaxqzksopnmjs.supabase.co PROD_KEY=your_prod_key ./scripts/compare-rls-environments.sh"
     exit 1
 fi
 

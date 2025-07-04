@@ -13,8 +13,19 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-DEV_PROJECT_REF="${DEV_PROJECT_REF:-xqkmpkfqoisqzznnvlox}"
+DEV_PROJECT_REF="${DEV_PROJECT_REF:-}"
 BRANCH_NAME="${BRANCH_NAME:-develop}"
+
+# Validate environment variables
+if [ -z "$DEV_PROJECT_REF" ]; then
+    echo -e "${RED}❌ Error: Missing required environment variable${NC}"
+    echo "Please set the following environment variable:"
+    echo "  DEV_PROJECT_REF - Development Supabase project reference"
+    echo ""
+    echo "Example:"
+    echo "  DEV_PROJECT_REF=xqkmpkfqoisqzznnvlox ./scripts/setup-develop-branch.sh"
+    exit 1
+fi
 
 echo -e "${BLUE}🚀 OneAlarm Develop Branch Setup${NC}"
 echo "=================================="

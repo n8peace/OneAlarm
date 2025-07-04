@@ -23,13 +23,13 @@ ENVIRONMENT="${ENVIRONMENT:-production}"
 # Supabase configuration with environment-specific URLs
 if [ "$ENVIRONMENT" = "development" ]; then
     # Development environment
-    SUPABASE_URL="${SUPABASE_URL:-https://xqkmpkfqoisqzznnvlox.supabase.co}"
-    SUPABASE_PROJECT_REF="${SUPABASE_PROJECT_REF:-xqkmpkfqoisqzznnvlox}"
+    SUPABASE_URL="${SUPABASE_URL:-}"
+    SUPABASE_PROJECT_REF="${SUPABASE_PROJECT_REF:-}"
     SUPABASE_BRANCH="${SUPABASE_BRANCH:-develop}"
 else
     # Production environment (default)
-    SUPABASE_URL="${SUPABASE_URL:-https://joyavvleaxqzksopnmjs.supabase.co}"
-    SUPABASE_PROJECT_REF="${SUPABASE_PROJECT_REF:-joyavvleaxqzksopnmjs}"
+    SUPABASE_URL="${SUPABASE_URL:-}"
+    SUPABASE_PROJECT_REF="${SUPABASE_PROJECT_REF:-}"
     SUPABASE_BRANCH="${SUPABASE_BRANCH:-main}"
 fi
 

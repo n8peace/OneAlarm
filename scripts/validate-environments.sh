@@ -13,9 +13,21 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-PROD_PROJECT_REF="${PROD_PROJECT_REF:-joyavvleaxqzksopnmjs}"
-DEV_PROJECT_REF="${DEV_PROJECT_REF:-xqkmpkfqoisqzznnvlox}"
+PROD_PROJECT_REF="${PROD_PROJECT_REF:-}"
+DEV_PROJECT_REF="${DEV_PROJECT_REF:-}"
 BRANCH_NAME="${BRANCH_NAME:-develop}"
+
+# Validate environment variables
+if [ -z "$PROD_PROJECT_REF" ] || [ -z "$DEV_PROJECT_REF" ]; then
+    echo -e "${RED}❌ Error: Missing required environment variables${NC}"
+    echo "Please set the following environment variables:"
+    echo "  PROD_PROJECT_REF - Production Supabase project reference"
+    echo "  DEV_PROJECT_REF - Development Supabase project reference"
+    echo ""
+    echo "Example:"
+    echo "  PROD_PROJECT_REF=joyavvleaxqzksopnmjs DEV_PROJECT_REF=xqkmpkfqoisqzznnvlox ./scripts/validate-environments.sh"
+    exit 1
+fi
 
 echo -e "${BLUE}🔍 OneAlarm Environment Validation${NC}"
 echo "=================================="
