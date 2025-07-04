@@ -25,7 +25,7 @@ if [ -z "$PROD_PROJECT_REF" ] || [ -z "$DEV_PROJECT_REF" ]; then
     echo "  DEV_PROJECT_REF - Development Supabase project reference"
     echo ""
     echo "Example:"
-    echo "  PROD_PROJECT_REF=joyavvleaxqzksopnmjs DEV_PROJECT_REF=xqkmpkfqoisqzznnvlox ./scripts/validate-environments.sh"
+    echo "  PROD_PROJECT_REF=your_prod_project_ref DEV_PROJECT_REF=your_dev_project_ref ./scripts/validate-environments.sh"
     exit 1
 fi
 

@@ -23,7 +23,7 @@ if [ -z "$DEV_PROJECT_REF" ]; then
     echo "  DEV_PROJECT_REF - Development Supabase project reference"
     echo ""
     echo "Example:"
-    echo "  DEV_PROJECT_REF=xqkmpkfqoisqzznnvlox ./scripts/setup-develop-branch.sh"
+    echo "  DEV_PROJECT_REF=your_dev_project_ref ./scripts/setup-develop-branch.sh"
     exit 1
 fi
 

@@ -42,7 +42,7 @@ if [ -z "$DEV_URL" ] || [ -z "$DEV_KEY" ] || [ -z "$PROD_URL" ] || [ -z "$PROD_K
     echo "  PROD_KEY - Production environment service role key"
     echo ""
     echo "Example:"
-    echo "  DEV_URL=https://xqkmpkfqoisqzznnvlox.supabase.co DEV_KEY=your_dev_key PROD_URL=https://joyavvleaxqzksopnmjs.supabase.co PROD_KEY=your_prod_key ./scripts/compare-rls-environments.sh"
+    echo "  DEV_URL=https://your_dev_project.supabase.co DEV_KEY=your_dev_key PROD_URL=https://your_prod_project.supabase.co PROD_KEY=your_prod_key ./scripts/compare-rls-environments.sh"
     exit 1
 fi
 
