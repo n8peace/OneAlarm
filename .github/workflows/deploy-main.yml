@@ -132,11 +132,10 @@ jobs:
         export SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}
         supabase link --project-ref ${{ secrets.SUPABASE_PROD_PROJECT_REF }}
         
-    - name: Switch to main branch
+    - name: Verify main branch deployment
       run: |
-        echo "🔄 Switching to main branch..."
-        export SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        supabase branch switch main
+        echo "✅ Deploying to main branch (default branch)"
+        echo "No branch switching needed for main branch deployment"
         
     - name: Create deployment backup
       run: |
