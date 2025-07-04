@@ -95,18 +95,18 @@ jobs:
         echo "🔍 Validating production environment variables..."
         
         # Check each secret directly using GitHub Actions syntax
-        if [ -z "${{ secrets.SUPABASE_URL }}" ]; then
-          echo "❌ Missing required environment variable: SUPABASE_URL"
+        if [ -z "${{ secrets.SUPABASE_URL_PROD }}" ]; then
+          echo "❌ Missing required environment variable: SUPABASE_URL_PROD"
           exit 1
         else
-          echo "✅ SUPABASE_URL is set"
+          echo "✅ SUPABASE_URL_PROD is set"
         fi
         
-        if [ -z "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" ]; then
-          echo "❌ Missing required environment variable: SUPABASE_SERVICE_ROLE_KEY"
+        if [ -z "${{ secrets.SUPABASE_SERVICE_ROLE_KEY_PROD }}" ]; then
+          echo "❌ Missing required environment variable: SUPABASE_SERVICE_ROLE_KEY_PROD"
           exit 1
         else
-          echo "✅ SUPABASE_SERVICE_ROLE_KEY is set"
+          echo "✅ SUPABASE_SERVICE_ROLE_KEY_PROD is set"
         fi
         
         if [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ]; then
@@ -116,11 +116,11 @@ jobs:
           echo "✅ SUPABASE_ACCESS_TOKEN is set"
         fi
         
-        if [ -z "${{ secrets.SUPABASE_PROJECT_REF }}" ]; then
-          echo "❌ Missing required environment variable: SUPABASE_PROJECT_REF"
+        if [ -z "${{ secrets.SUPABASE_PROD_PROJECT_REF }}" ]; then
+          echo "❌ Missing required environment variable: SUPABASE_PROD_PROJECT_REF"
           exit 1
         else
-          echo "✅ SUPABASE_PROJECT_REF is set"
+          echo "✅ SUPABASE_PROD_PROJECT_REF is set"
         fi
         
         echo "✅ All required environment variables are set"
@@ -130,7 +130,7 @@ jobs:
         echo "🔗 Linking to Supabase project..."
         # Set the access token for Supabase CLI authentication
         export SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+        supabase link --project-ref ${{ secrets.SUPABASE_PROD_PROJECT_REF }}
         
     - name: Switch to main branch
       run: |
@@ -171,7 +171,7 @@ jobs:
         export SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}
         
         # Deploy all functions to main branch
-        supabase functions deploy --project-ref ${{ secrets.SUPABASE_PROJECT_REF }} --branch main
+        supabase functions deploy --project-ref ${{ secrets.SUPABASE_PROD_PROJECT_REF }} --branch main
         
     - name: Set environment variables
       run: |
@@ -179,14 +179,14 @@ jobs:
         export SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}
         
         # Set secrets for the main branch
-        supabase secrets set --project-ref ${{ secrets.SUPABASE_PROJECT_REF }} --branch main \
-          SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
-          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }} \
-          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
-          NEWSAPI_KEY=${{ secrets.NEWSAPI_KEY }} \
-          SPORTSDB_API_KEY=${{ secrets.SPORTSDB_API_KEY }} \
-          RAPIDAPI_KEY=${{ secrets.RAPIDAPI_KEY }} \
-          ABSTRACT_API_KEY=${{ secrets.ABSTRACT_API_KEY }}
+        supabase secrets set --project-ref ${{ secrets.SUPABASE_PROD_PROJECT_REF }} --branch main \
+          SUPABASE_URL=${{ secrets.SUPABASE_URL_PROD }} \
+          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY_PROD }} \
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY_PROD }} \
+          NEWSAPI_KEY=${{ secrets.NEWSAPI_KEY_PROD }} \
+          SPORTSDB_API_KEY=${{ secrets.SPORTSDB_API_KEY_PROD }} \
+          RAPIDAPI_KEY=${{ secrets.RAPIDAPI_KEY_PROD }} \
+          ABSTRACT_API_KEY=${{ secrets.ABSTRACT_API_KEY_PROD }}
           
     - name: Run production health checks
       run: |
@@ -194,8 +194,8 @@ jobs:
         
         # Test daily-content function
         echo "Testing daily-content function..."
-        response=$(curl -s -w "\n%{http_code}" -X GET ${{ secrets.SUPABASE_URL }}/functions/v1/daily-content \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
+        response=$(curl -s -w "\n%{http_code}" -X GET ${{ secrets.SUPABASE_URL_PROD }}/functions/v1/daily-content \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_PROD }}")
         
         http_code=$(echo "$response" | tail -n1)
         if [ "$http_code" = "200" ]; then
@@ -208,8 +208,8 @@ jobs:
         
         # Test generate-alarm-audio function
         echo "Testing generate-alarm-audio function..."
-        response=$(curl -s -w "\n%{http_code}" -X GET ${{ secrets.SUPABASE_URL }}/functions/v1/generate-alarm-audio \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
+        response=$(curl -s -w "\n%{http_code}" -X GET ${{ secrets.SUPABASE_URL_PROD }}/functions/v1/generate-alarm-audio \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_PROD }}")
         
         http_code=$(echo "$response" | tail -n1)
         if [ "$http_code" = "200" ]; then
@@ -222,8 +222,8 @@ jobs:
         
         # Test generate-audio function
         echo "Testing generate-audio function..."
-        response=$(curl -s -w "\n%{http_code}" -X GET ${{ secrets.SUPABASE_URL }}/functions/v1/generate-audio \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
+        response=$(curl -s -w "\n%{http_code}" -X GET ${{ secrets.SUPABASE_URL_PROD }}/functions/v1/generate-audio \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_PROD }}")
         
         http_code=$(echo "$response" | tail -n1)
         if [ "$http_code" = "200" ]; then

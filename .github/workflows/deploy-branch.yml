@@ -212,9 +212,9 @@ jobs:
         echo "🏥 Running health checks for branch: ${{ steps.branch.outputs.branch }}"
         
         # Construct branch URL
-        BRANCH_URL="${{ secrets.SUPABASE_URL }}"
+        BRANCH_URL="${SUPABASE_URL}"
         if [ "${{ steps.branch.outputs.branch }}" != "main" ]; then
-          BRANCH_URL="${{ secrets.SUPABASE_URL }}/branches/${{ steps.branch.outputs.branch }}"
+          BRANCH_URL="${SUPABASE_URL}/branches/${{ steps.branch.outputs.branch }}"
         fi
         
         echo "🔗 Testing branch URL: $BRANCH_URL"
@@ -222,7 +222,7 @@ jobs:
         # Test daily-content function
         echo "Testing daily-content function..."
         response=$(curl -s -w "\n%{http_code}" -X GET $BRANCH_URL/functions/v1/daily-content \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
+          -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY")
         
         http_code=$(echo "$response" | tail -n1)
         if [ "$http_code" = "200" ]; then
@@ -236,7 +236,7 @@ jobs:
         # Test generate-alarm-audio function
         echo "Testing generate-alarm-audio function..."
         response=$(curl -s -w "\n%{http_code}" -X GET $BRANCH_URL/functions/v1/generate-alarm-audio \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
+          -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY")
         
         http_code=$(echo "$response" | tail -n1)
         if [ "$http_code" = "200" ]; then
