@@ -1,5 +1,7 @@
 # OneAlarm CI/CD Implementation Scope Document
 
+> **⚠️ IMPORTANT UPDATE**: This document has been superseded by the new [Branch-Based CI/CD Implementation Plan](BRANCH_BASED_CI_CD_IMPLEMENTATION_PLAN.md). The branch-based approach is more efficient and cost-effective than the separate project approach outlined here.
+
 ## 🎯 Project Overview
 
 **Objective**: Implement a comprehensive CI/CD pipeline using GitHub Actions and Supabase with separate production and development environments, while maintaining the ability to continue development with AI assistance.
@@ -12,8 +14,9 @@
 - ✅ **COMPLETED**: Hardcoded URL standardization
 
 **Target State**:
-- Automated CI/CD pipeline
-- Separate dev/prod environments
+- Single Supabase project with multiple branches
+- Automated CI/CD pipeline with GitHub Actions
+- Branch-per-feature development workflow
 - Zero-downtime deployments
 - Maintained development workflow
 
@@ -81,15 +84,24 @@ onealarm/
 ```
 Production (main branch):
 ├── Supabase Project: joyavvleaxqzksopnmjs
+├── Branch: main
 ├── Environment: production
 ├── API Keys: Production keys
 └── Cron Schedule: Current schedule
 
 Development (develop branch):
-├── Supabase Project: onealarm-dev (new)
+├── Supabase Project: joyavvleaxqzksopnmjs
+├── Branch: develop
 ├── Environment: development
-├── API Keys: Development keys
+├── API Keys: Same as production (shared)
 └── Cron Schedule: Reduced frequency
+
+Feature Branches:
+├── Supabase Project: joyavvleaxqzksopnmjs
+├── Branch: feature-*
+├── Environment: feature-specific
+├── API Keys: Same as production (shared)
+└── Cron Schedule: Disabled
 ```
 
 ---
@@ -185,6 +197,8 @@ Development (develop branch):
 - Environment-specific configurations
 - Dev environment documentation
 
+**Note**: This phase has been superseded by the new branch-based approach. See [Branch-Based CI/CD Implementation Plan](BRANCH_BASED_CI_CD_IMPLEMENTATION_PLAN.md) for the updated strategy.
+
 ### **Phase 3: Advanced CI/CD (2 hours)**
 **Objective**: Implement comprehensive deployment and testing workflows
 
@@ -198,6 +212,8 @@ Development (develop branch):
    - Automated testing workflows
    - Health check verification
    - Rollback capabilities
+
+**Note**: This phase has been updated for branch-based deployment. See [Branch-Based CI/CD Implementation Plan](BRANCH_BASED_CI_CD_IMPLEMENTATION_PLAN.md) for the new approach.
 
 **Deliverables**:
 - Complete CI/CD pipeline

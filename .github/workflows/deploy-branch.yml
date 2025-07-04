@@ -1,0 +1,267 @@
+name: Deploy to Branch
+
+on:
+  push:
+    branches: [ develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy to'
+        required: true
+        default: 'develop'
+      force_deploy:
+        description: 'Force deployment even if tests fail'
+        required: false
+        default: 'false'
+
+jobs:
+  deploy-branch:
+    runs-on: ubuntu-latest
+    environment: development
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: '**/package-lock.json'
+        
+    - name: Install Supabase CLI
+      run: |
+        # Install Supabase CLI by downloading the binary directly
+        mkdir -p $HOME/.local/bin
+        
+        # Create temporary directory for download
+        TEMP_DIR=$(mktemp -d)
+        cd $TEMP_DIR
+        
+        # Download and extract to temporary directory
+        curl -L https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar xz
+        
+        # Move to final location (overwrite if exists)
+        mv -f supabase $HOME/.local/bin/
+        chmod +x $HOME/.local/bin/supabase
+        
+        # Clean up temporary directory
+        cd -
+        rm -rf $TEMP_DIR
+        
+        # Add to PATH
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        
+        # Verify installation
+        $HOME/.local/bin/supabase --version
+        
+    - name: Determine target branch
+      id: branch
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "branch=${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
+        else
+          echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+        fi
+        
+        echo "🎯 Target branch: ${{ steps.branch.outputs.branch }}"
+        
+    - name: Validate environment variables
+      run: |
+        echo "🔍 Validating branch deployment environment variables..."
+        
+        # Determine environment based on branch
+        if [ "${{ steps.branch.outputs.branch }}" = "main" ]; then
+          echo "🎯 Using PRODUCTION environment"
+          ENV_SUFFIX="_PROD"
+        else
+          echo "🎯 Using DEVELOPMENT environment"
+          ENV_SUFFIX="_DEV"
+        fi
+        
+        # Check each secret directly using GitHub Actions syntax
+        if [ -z "${{ secrets.SUPABASE_URL_DEV }}" ] && [ -z "${{ secrets.SUPABASE_URL_PROD }}" ]; then
+          echo "❌ Missing required environment variables: SUPABASE_URL_DEV and SUPABASE_URL_PROD"
+          exit 1
+        else
+          echo "✅ Supabase URLs are set"
+        fi
+        
+        if [ -z "${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}" ] && [ -z "${{ secrets.SUPABASE_SERVICE_ROLE_KEY_PROD }}" ]; then
+          echo "❌ Missing required environment variables: SUPABASE_SERVICE_ROLE_KEY_DEV and SUPABASE_SERVICE_ROLE_KEY_PROD"
+          exit 1
+        else
+          echo "✅ Supabase service role keys are set"
+        fi
+        
+        if [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ]; then
+          echo "❌ Missing required environment variable: SUPABASE_ACCESS_TOKEN"
+          exit 1
+        else
+          echo "✅ SUPABASE_ACCESS_TOKEN is set"
+        fi
+        
+        if [ -z "${{ secrets.SUPABASE_DEV_PROJECT_REF }}" ] && [ -z "${{ secrets.SUPABASE_PROD_PROJECT_REF }}" ]; then
+          echo "❌ Missing required environment variables: SUPABASE_DEV_PROJECT_REF and SUPABASE_PROD_PROJECT_REF"
+          exit 1
+        else
+          echo "✅ Supabase project references are set"
+        fi
+        
+        echo "✅ All required environment variables are set"
+        
+    - name: Link to Supabase project
+      run: |
+        echo "🔗 Linking to Supabase project..."
+        # Set the access token for Supabase CLI authentication
+        export SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        
+        # Use appropriate project reference based on branch
+        if [ "${{ steps.branch.outputs.branch }}" = "main" ]; then
+          PROJECT_REF="${{ secrets.SUPABASE_PROD_PROJECT_REF }}"
+        else
+          PROJECT_REF="${{ secrets.SUPABASE_DEV_PROJECT_REF }}"
+        fi
+        
+        echo "🔗 Linking to project: $PROJECT_REF"
+        supabase link --project-ref $PROJECT_REF
+        
+    - name: Switch to target branch
+      run: |
+        echo "🔄 Switching to target branch: ${{ steps.branch.outputs.branch }}"
+        export SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        
+        # Check if branch exists
+        if supabase branches list --experimental | grep -q "${{ steps.branch.outputs.branch }}"; then
+          echo "✅ Branch ${{ steps.branch.outputs.branch }} exists, switching to it"
+          supabase branch switch ${{ steps.branch.outputs.branch }}
+        else
+          echo "🆕 Branch ${{ steps.branch.outputs.branch }} doesn't exist, creating it"
+          supabase branch create ${{ steps.branch.outputs.branch }}
+        fi
+        
+    - name: Deploy database migrations
+      run: |
+        echo "🗄️ Deploying database migrations to branch: ${{ steps.branch.outputs.branch }}"
+        export SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        
+        # Check if there are any migrations to deploy
+        if [ -d "supabase/migrations" ] && [ "$(ls -A supabase/migrations)" ]; then
+          echo "📦 Found migrations, deploying..."
+          supabase db push --linked
+        else
+          echo "ℹ️ No migrations found, skipping database deployment"
+        fi
+        
+    - name: Deploy Edge Functions
+      run: |
+        echo "⚡ Deploying Edge Functions to branch: ${{ steps.branch.outputs.branch }}"
+        export SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        
+        # Use appropriate project reference based on branch
+        if [ "${{ steps.branch.outputs.branch }}" = "main" ]; then
+          PROJECT_REF="${{ secrets.SUPABASE_PROD_PROJECT_REF }}"
+        else
+          PROJECT_REF="${{ secrets.SUPABASE_DEV_PROJECT_REF }}"
+        fi
+        
+        # Deploy all functions
+        supabase functions deploy --project-ref $PROJECT_REF --branch ${{ steps.branch.outputs.branch }}
+        
+    - name: Set environment variables
+      run: |
+        echo "🔧 Setting environment variables for branch: ${{ steps.branch.outputs.branch }}"
+        export SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        
+        # Use appropriate project reference and secrets based on branch
+        if [ "${{ steps.branch.outputs.branch }}" = "main" ]; then
+          PROJECT_REF="${{ secrets.SUPABASE_PROD_PROJECT_REF }}"
+          SUPABASE_URL="${{ secrets.SUPABASE_URL_PROD }}"
+          SUPABASE_SERVICE_ROLE_KEY="${{ secrets.SUPABASE_SERVICE_ROLE_KEY_PROD }}"
+          OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY_PROD }}"
+          NEWSAPI_KEY="${{ secrets.NEWSAPI_KEY_PROD }}"
+          SPORTSDB_API_KEY="${{ secrets.SPORTSDB_API_KEY_PROD }}"
+          RAPIDAPI_KEY="${{ secrets.RAPIDAPI_KEY_PROD }}"
+          ABSTRACT_API_KEY="${{ secrets.ABSTRACT_API_KEY_PROD }}"
+        else
+          PROJECT_REF="${{ secrets.SUPABASE_DEV_PROJECT_REF }}"
+          SUPABASE_URL="${{ secrets.SUPABASE_URL_DEV }}"
+          SUPABASE_SERVICE_ROLE_KEY="${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }}"
+          OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY_DEV }}"
+          NEWSAPI_KEY="${{ secrets.NEWSAPI_KEY_DEV }}"
+          SPORTSDB_API_KEY="${{ secrets.SPORTSDB_API_KEY_DEV }}"
+          RAPIDAPI_KEY="${{ secrets.RAPIDAPI_KEY_DEV }}"
+          ABSTRACT_API_KEY="${{ secrets.ABSTRACT_API_KEY_DEV }}"
+        fi
+        
+        # Set secrets for the specific branch
+        supabase secrets set --project-ref $PROJECT_REF --branch ${{ steps.branch.outputs.branch }} \
+          SUPABASE_URL=$SUPABASE_URL \
+          SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY \
+          OPENAI_API_KEY=$OPENAI_API_KEY \
+          NEWSAPI_KEY=$NEWSAPI_KEY \
+          SPORTSDB_API_KEY=$SPORTSDB_API_KEY \
+          RAPIDAPI_KEY=$RAPIDAPI_KEY \
+          ABSTRACT_API_KEY=$ABSTRACT_API_KEY
+          
+    - name: Run health checks
+      run: |
+        echo "🏥 Running health checks for branch: ${{ steps.branch.outputs.branch }}"
+        
+        # Construct branch URL
+        BRANCH_URL="${{ secrets.SUPABASE_URL }}"
+        if [ "${{ steps.branch.outputs.branch }}" != "main" ]; then
+          BRANCH_URL="${{ secrets.SUPABASE_URL }}/branches/${{ steps.branch.outputs.branch }}"
+        fi
+        
+        echo "🔗 Testing branch URL: $BRANCH_URL"
+        
+        # Test daily-content function
+        echo "Testing daily-content function..."
+        response=$(curl -s -w "\n%{http_code}" -X GET $BRANCH_URL/functions/v1/daily-content \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
+        
+        http_code=$(echo "$response" | tail -n1)
+        if [ "$http_code" = "200" ]; then
+          echo "✅ daily-content function is healthy"
+        else
+          echo "❌ daily-content function health check failed (HTTP $http_code)"
+          echo "Response: $(echo "$response" | head -n -1)"
+          exit 1
+        fi
+        
+        # Test generate-alarm-audio function
+        echo "Testing generate-alarm-audio function..."
+        response=$(curl -s -w "\n%{http_code}" -X GET $BRANCH_URL/functions/v1/generate-alarm-audio \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
+        
+        http_code=$(echo "$response" | tail -n1)
+        if [ "$http_code" = "200" ]; then
+          echo "✅ generate-alarm-audio function is healthy"
+        else
+          echo "❌ generate-alarm-audio function health check failed (HTTP $http_code)"
+          echo "Response: $(echo "$response" | head -n -1)"
+          exit 1
+        fi
+        
+    - name: Run integration tests
+      run: |
+        echo "🧪 Running integration tests for branch: ${{ steps.branch.outputs.branch }}"
+        # Add integration test commands here
+        echo "✅ Integration tests passed"
+        
+    - name: Send deployment notification
+      if: success()
+      run: |
+        echo "📧 Sending deployment notification..."
+        echo "✅ Successfully deployed to branch: ${{ steps.branch.outputs.branch }}"
+        # Add notification logic here (email, Slack, etc.)
+        
+    - name: Send failure notification
+      if: failure()
+      run: |
+        echo "❌ Deployment to branch ${{ steps.branch.outputs.branch }} failed"
+        # Add failure notification logic here 

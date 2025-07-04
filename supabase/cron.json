@@ -13,13 +13,20 @@
     "function": "generate-alarm-audio",
     "description": "Process audio generation queue every 1 minute for Phase 1 scaling"
   },
+  "audio_cleanup": {
+    "service": "cron-job.org",
+    "status": "active",
+    "schedule": "0 * * * *",
+    "function": "cleanup-audio-files",
+    "description": "Automated cleanup of expired audio files every hour on the hour"
+  },
   "monitoring": {
     "health_check_function": "check_daily_content_health",
     "logs_table": "logs",
     "data_table": "daily_content"
   },
   "configuration": {
-    "url": "https://joyavvleaxqzksopnmjs.supabase.co/functions/v1/daily-content",
+    "url": "https://bfrvahxmokeyrfnlaiwd.supabase.co/functions/v1/daily-content",
     "method": "POST",
     "headers": {
       "Content-Type": "application/json",

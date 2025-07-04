@@ -1,13 +1,18 @@
--- Initial schema for OneAlarm production database
--- This migration creates the complete base schema
+-- Production schema sync - Add missing elements without conflicts
+-- This migration adds the complete schema that's missing from production
 
--- Enable necessary extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- Create custom types if they don't exist
+DO $$ BEGIN
+    CREATE TYPE audio_type AS ENUM ('alarm', 'test_clip');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
--- Create custom types
-CREATE TYPE audio_type AS ENUM ('alarm', 'test_clip');
-CREATE TYPE alarm_status AS ENUM ('active', 'inactive', 'snoozed');
+DO $$ BEGIN
+    CREATE TYPE alarm_status AS ENUM ('active', 'inactive', 'snoozed');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Create users table (extends Supabase auth.users)
 CREATE TABLE IF NOT EXISTS users (
@@ -85,14 +90,6 @@ CREATE TABLE IF NOT EXISTS audio (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create logs table (minimal for migration compatibility)
-CREATE TABLE IF NOT EXISTS logs (
-    id SERIAL PRIMARY KEY,
-    event_type TEXT,
-    meta JSONB,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_alarms_user_id ON alarms(user_id);
 CREATE INDEX IF NOT EXISTS idx_daily_content_date ON daily_content(date);
@@ -100,18 +97,15 @@ CREATE INDEX IF NOT EXISTS idx_audio_files_user_id ON audio_files(user_id);
 CREATE INDEX IF NOT EXISTS idx_audio_files_alarm_id ON audio_files(alarm_id);
 
 -- Create triggers for updated_at timestamps
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_user_preferences_updated_at ON user_preferences;
 CREATE TRIGGER update_user_preferences_updated_at BEFORE UPDATE ON user_preferences FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_alarms_updated_at ON alarms;
 CREATE TRIGGER update_alarms_updated_at BEFORE UPDATE ON alarms FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_daily_content_updated_at ON daily_content;
 CREATE TRIGGER update_daily_content_updated_at BEFORE UPDATE ON daily_content FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_audio_files_updated_at ON audio_files;
 CREATE TRIGGER update_audio_files_updated_at BEFORE UPDATE ON audio_files FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Create function to handle new user creation
@@ -125,6 +119,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Create trigger for new user creation
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION handle_new_user();
@@ -183,19 +178,39 @@ ALTER TABLE daily_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audio_files ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audio ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies
+-- Create RLS policies (drop and recreate to avoid conflicts)
+DROP POLICY IF EXISTS "Users can view own data" ON users;
+DROP POLICY IF EXISTS "Users can update own data" ON users;
 CREATE POLICY "Users can view own data" ON users FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Users can update own data" ON users FOR UPDATE USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can view own preferences" ON user_preferences;
+DROP POLICY IF EXISTS "Users can update own preferences" ON user_preferences;
 CREATE POLICY "Users can view own preferences" ON user_preferences FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can update own preferences" ON user_preferences FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can view own alarms" ON alarms;
+DROP POLICY IF EXISTS "Users can insert own alarms" ON alarms;
+DROP POLICY IF EXISTS "Users can update own alarms" ON alarms;
+DROP POLICY IF EXISTS "Users can delete own alarms" ON alarms;
 CREATE POLICY "Users can view own alarms" ON alarms FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own alarms" ON alarms FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own alarms" ON alarms FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own alarms" ON alarms FOR DELETE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can view own audio files" ON audio_files;
+DROP POLICY IF EXISTS "Users can insert own audio files" ON audio_files;
+DROP POLICY IF EXISTS "Users can update own audio files" ON audio_files;
 CREATE POLICY "Users can view own audio files" ON audio_files FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own audio files" ON audio_files FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own audio files" ON audio_files FOR UPDATE USING (auth.uid() = user_id);
-CREATE POLICY "Users can delete own audio files" ON audio_files FOR DELETE USING (auth.uid() = user_id); 
+
+DROP POLICY IF EXISTS "Users can view own audio" ON audio;
+DROP POLICY IF EXISTS "Users can insert own audio" ON audio;
+DROP POLICY IF EXISTS "Users can update own audio" ON audio;
+CREATE POLICY "Users can view own audio" ON audio FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own audio" ON audio FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own audio" ON audio FOR UPDATE USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users can view daily content" ON daily_content;
+CREATE POLICY "Users can view daily content" ON daily_content FOR SELECT USING (true); 

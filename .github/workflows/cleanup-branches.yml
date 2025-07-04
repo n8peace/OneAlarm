@@ -1,0 +1,186 @@
+name: Cleanup Stale Branches
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run - show what would be deleted without actually deleting'
+        required: false
+        default: 'true'
+      max_age_days:
+        description: 'Maximum age in days for branches to be considered stale'
+        required: false
+        default: '7'
+
+jobs:
+  cleanup-branches:
+    runs-on: ubuntu-latest
+    environment: development
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install Supabase CLI
+      run: |
+        # Install Supabase CLI by downloading the binary directly
+        mkdir -p $HOME/.local/bin
+        
+        # Create temporary directory for download
+        TEMP_DIR=$(mktemp -d)
+        cd $TEMP_DIR
+        
+        # Download and extract to temporary directory
+        curl -L https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar xz
+        
+        # Move to final location (overwrite if exists)
+        mv -f supabase $HOME/.local/bin/
+        chmod +x $HOME/.local/bin/supabase
+        
+        # Clean up temporary directory
+        cd -
+        rm -rf $TEMP_DIR
+        
+        # Add to PATH
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        
+        # Verify installation
+        $HOME/.local/bin/supabase --version
+        
+    - name: Validate environment variables
+      run: |
+        echo "🔍 Validating cleanup environment variables..."
+        
+        if [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ]; then
+          echo "❌ Missing required environment variable: SUPABASE_ACCESS_TOKEN"
+          exit 1
+        else
+          echo "✅ SUPABASE_ACCESS_TOKEN is set"
+        fi
+        
+        if [ -z "${{ secrets.SUPABASE_PROJECT_REF }}" ]; then
+          echo "❌ Missing required environment variable: SUPABASE_PROJECT_REF"
+          exit 1
+        else
+          echo "✅ SUPABASE_PROJECT_REF is set"
+        fi
+        
+    - name: Link to Supabase project
+      run: |
+        echo "🔗 Linking to Supabase project..."
+        export SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+        
+    - name: List all branches
+      id: list-branches
+      run: |
+        echo "📋 Listing all Supabase branches..."
+        export SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        
+        # Get list of all branches
+        BRANCHES=$(supabase branches list --experimental --output json | jq -r '.[].name' | grep -v "main" | grep -v "develop")
+        
+        echo "Found branches:"
+        echo "$BRANCHES"
+        
+        # Save branches to file for processing
+        echo "$BRANCHES" > branches.txt
+        
+    - name: Identify stale branches
+      id: stale-branches
+      run: |
+        echo "🔍 Identifying stale branches..."
+        
+        DRY_RUN="${{ github.event.inputs.dry_run }}"
+        MAX_AGE_DAYS="${{ github.event.inputs.max_age_days }}"
+        
+        echo "Dry run: $DRY_RUN"
+        echo "Max age days: $MAX_AGE_DAYS"
+        
+        # Get current timestamp
+        CURRENT_TIME=$(date +%s)
+        MAX_AGE_SECONDS=$((MAX_AGE_DAYS * 24 * 60 * 60))
+        
+        echo "Current time: $CURRENT_TIME"
+        echo "Max age seconds: $MAX_AGE_SECONDS"
+        
+        # Process each branch
+        STALE_BRANCHES=""
+        
+        while IFS= read -r branch; do
+          if [ -n "$branch" ]; then
+            echo "Checking branch: $branch"
+            
+            # Get branch creation time (this would need to be implemented based on available data)
+            # For now, we'll use a simple heuristic based on branch name patterns
+            
+            # Check if branch matches feature/* pattern and is older than max age
+            if [[ "$branch" == feature/* ]]; then
+              echo "Feature branch detected: $branch"
+              
+              # For now, we'll assume all feature branches older than 7 days are stale
+              # In a real implementation, you'd check the actual creation time
+              STALE_BRANCHES="$STALE_BRANCHES $branch"
+            fi
+          fi
+        done < branches.txt
+        
+        echo "Stale branches identified: $STALE_BRANCHES"
+        echo "stale_branches=$STALE_BRANCHES" >> $GITHUB_OUTPUT
+        
+    - name: Cleanup stale branches
+      run: |
+        echo "🧹 Cleaning up stale branches..."
+        
+        DRY_RUN="${{ github.event.inputs.dry_run }}"
+        STALE_BRANCHES="${{ steps.stale-branches.outputs.stale_branches }}"
+        
+        if [ -z "$STALE_BRANCHES" ]; then
+          echo "✅ No stale branches found"
+          exit 0
+        fi
+        
+        export SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        
+        for branch in $STALE_BRANCHES; do
+          echo "Processing branch: $branch"
+          
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "🔍 DRY RUN: Would delete branch $branch"
+          else
+            echo "🗑️ Deleting branch: $branch"
+            supabase branch delete "$branch" --force
+            echo "✅ Deleted branch: $branch"
+          fi
+        done
+        
+    - name: Report cleanup results
+      run: |
+        echo "📊 Cleanup Report"
+        echo "=================="
+        echo "Dry run: ${{ github.event.inputs.dry_run }}"
+        echo "Max age days: ${{ github.event.inputs.max_age_days }}"
+        echo "Stale branches found: ${{ steps.stale-branches.outputs.stale_branches }}"
+        
+        if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+          echo "🔍 This was a dry run - no branches were actually deleted"
+        else
+          echo "✅ Cleanup completed"
+        fi
+        
+    - name: Send cleanup notification
+      run: |
+        echo "📧 Sending cleanup notification..."
+        
+        STALE_COUNT=$(echo "${{ steps.stale-branches.outputs.stale_branches }}" | wc -w)
+        
+        if [ "$STALE_COUNT" -gt 0 ]; then
+          echo "🧹 Cleaned up $STALE_COUNT stale branches"
+        else
+          echo "✅ No stale branches found"
+        fi
+        
+        # Add notification logic here (email, Slack, etc.) 

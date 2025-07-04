@@ -17,17 +17,39 @@ if [ -f .env ]; then
     export $(grep -v '^#' .env | xargs)
 fi
 
-# Supabase configuration with fallback for backward compatibility
-SUPABASE_URL="${SUPABASE_URL:-https://joyavvleaxqzksopnmjs.supabase.co}"
+# Environment-specific configuration
+ENVIRONMENT="${ENVIRONMENT:-production}"
+
+# Supabase configuration with environment-specific URLs
+if [ "$ENVIRONMENT" = "development" ]; then
+    # Development environment
+    SUPABASE_URL="${SUPABASE_URL:-https://xqkmpkfqoisqzznnvlox.supabase.co}"
+    SUPABASE_PROJECT_REF="${SUPABASE_PROJECT_REF:-xqkmpkfqoisqzznnvlox}"
+    SUPABASE_BRANCH="${SUPABASE_BRANCH:-develop}"
+else
+    # Production environment (default)
+    SUPABASE_URL="${SUPABASE_URL:-https://joyavvleaxqzksopnmjs.supabase.co}"
+    SUPABASE_PROJECT_REF="${SUPABASE_PROJECT_REF:-joyavvleaxqzksopnmjs}"
+    SUPABASE_BRANCH="${SUPABASE_BRANCH:-main}"
+fi
+
 SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY:-}"
 SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY:-}"
 
-# Function URLs
+# Construct branch-specific URL if needed
+if [ -n "$SUPABASE_BRANCH" ] && [ "$SUPABASE_BRANCH" != "main" ]; then
+    SUPABASE_BRANCH_URL="${SUPABASE_URL}/branches/${SUPABASE_BRANCH}"
+else
+    SUPABASE_BRANCH_URL="$SUPABASE_URL"
+fi
+
+# Function URLs (use branch URL if available)
+FUNCTION_BASE_URL="${SUPABASE_BRANCH_URL:-$SUPABASE_URL}"
 FUNCTION_URLS=(
-    "daily-content:${SUPABASE_URL}/functions/v1/daily-content"
-    "generate-audio:${SUPABASE_URL}/functions/v1/generate-audio"
-    "generate-alarm-audio:${SUPABASE_URL}/functions/v1/generate-alarm-audio"
-    "cleanup-audio-files:${SUPABASE_URL}/functions/v1/cleanup-audio-files"
+    "daily-content:${FUNCTION_BASE_URL}/functions/v1/daily-content"
+    "generate-audio:${FUNCTION_BASE_URL}/functions/v1/generate-audio"
+    "generate-alarm-audio:${FUNCTION_BASE_URL}/functions/v1/generate-alarm-audio"
+    "cleanup-audio-files:${FUNCTION_BASE_URL}/functions/v1/cleanup-audio-files"
 )
 
 # Validation functions
@@ -134,6 +156,18 @@ format_json() {
     fi
 }
 
+# Function to display current environment info
+show_environment_info() {
+    echo -e "${CYAN}🌍 Environment Information:${NC}"
+    echo -e "  Environment: ${YELLOW}$ENVIRONMENT${NC}"
+    echo -e "  Supabase URL: ${BLUE}$SUPABASE_URL${NC}"
+    echo -e "  Project Ref: ${BLUE}$SUPABASE_PROJECT_REF${NC}"
+    echo -e "  Branch: ${BLUE}$SUPABASE_BRANCH${NC}"
+    if [ "$SUPABASE_BRANCH_URL" != "$SUPABASE_URL" ]; then
+        echo -e "  Branch URL: ${BLUE}$SUPABASE_BRANCH_URL${NC}"
+    fi
+}
+
 # Export functions and variables
 export -f validate_environment
 export -f log_info
@@ -145,8 +179,10 @@ export -f get_function_url
 export -f make_api_call
 export -f check_jq
 export -f format_json
+export -f show_environment_info
 
 # Export color variables
 export RED GREEN YELLOW BLUE PURPLE CYAN NC
 export SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY
-export FUNCTION_URLS 
+export SUPABASE_PROJECT_REF SUPABASE_BRANCH SUPABASE_BRANCH_URL
+export FUNCTION_URLS ENVIRONMENT 
