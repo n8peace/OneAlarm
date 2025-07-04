@@ -13,8 +13,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-DEV_PROJECT_REF="xqkmpkfqoisqzznnvlox"
-BRANCH_NAME="develop"
+DEV_PROJECT_REF="${DEV_PROJECT_REF:-xqkmpkfqoisqzznnvlox}"
+BRANCH_NAME="${BRANCH_NAME:-develop}"
 
 echo -e "${BLUE}🚀 OneAlarm Develop Branch Setup${NC}"
 echo "=================================="

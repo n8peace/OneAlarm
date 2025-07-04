@@ -13,9 +13,9 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-PROD_PROJECT_REF="joyavvleaxqzksopnmjs"
-DEV_PROJECT_REF="xqkmpkfqoisqzznnvlox"
-BRANCH_NAME="develop"
+PROD_PROJECT_REF="${PROD_PROJECT_REF:-joyavvleaxqzksopnmjs}"
+DEV_PROJECT_REF="${DEV_PROJECT_REF:-xqkmpkfqoisqzznnvlox}"
+BRANCH_NAME="${BRANCH_NAME:-develop}"
 
 echo -e "${BLUE}🔍 OneAlarm Environment Validation${NC}"
 echo "=================================="

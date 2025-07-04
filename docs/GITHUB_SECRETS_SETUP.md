@@ -9,7 +9,7 @@ This document provides the complete list of GitHub secrets required for the OneA
 
 #### Production Environment
 - `SUPABASE_URL_PROD`: `https://joyavvleaxqzksopnmjs.supabase.co`
-- `SUPABASE_SERVICE_ROLE_KEY_PROD`: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpveWF2dmxlYXhxemtzb3BubWpzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDE5MDc2NSwiZXhwIjoyMDY1NzY2NzY1fQ.6Mf8KFY_9hXriVbYe1kZpKd4c_4m-3j2y6r_Ds4i4og`
+- `SUPABASE_SERVICE_ROLE_KEY_PROD`: `[Get from Supabase Dashboard]`
 - `SUPABASE_PROD_PROJECT_REF`: `joyavvleaxqzksopnmjs`
 
 #### Development Environment

@@ -43,7 +43,7 @@ Successfully completed Phase 2A of the OneAlarm CI/CD setup, synchronizing GitHu
 ### Supabase Configuration
 ```
 SUPABASE_URL_PROD=https://joyavvleaxqzksopnmjs.supabase.co
-SUPABASE_SERVICE_ROLE_KEY_PROD=[Production service role key]
+SUPABASE_SERVICE_ROLE_KEY_PROD=[Get from Supabase Dashboard]
 SUPABASE_PROD_PROJECT_REF=joyavvleaxqzksopnmjs
 
 SUPABASE_URL_DEV=https://xqkmpkfqoisqzznnvlox.supabase.co

@@ -14,11 +14,23 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Environment URLs and keys
-DEV_URL="https://joyavvleaxqzksopnmjs.supabase.co"
-DEV_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpveWF2dmxlYXhxemtzb3BubWpzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDE5MDc2NSwiZXhwIjoyMDY1NzY2NzY1fQ.6Mf8KFY_9hXriVbYe1kZpKd4c_4m-3j2y6r_Ds4i4og"
+DEV_URL="${DEV_URL:-https://joyavvleaxqzksopnmjs.supabase.co}"
+DEV_KEY="${DEV_KEY:-}"
 
-PROD_URL="https://bfrvahxmokeyrfnlaiwd.supabase.co"
-PROD_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmcnZhaHhtb2tleXJmbmxhaXdkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTQzMDI2NCwiZXhwIjoyMDY3MDA2MjY0fQ.C2x_AIkig4Fc7JSEyrkxve7E4uAwwvSRhPNDAeOfW-A"
+PROD_URL="${PROD_URL:-https://joyavvleaxqzksopnmjs.supabase.co}"
+PROD_KEY="${PROD_KEY:-}"
+
+# Validate environment variables
+if [ -z "$DEV_KEY" ] || [ -z "$PROD_KEY" ]; then
+    echo -e "${RED}❌ Error: Missing required environment variables${NC}"
+    echo "Please set the following environment variables:"
+    echo "  DEV_KEY - Development environment service role key"
+    echo "  PROD_KEY - Production environment service role key"
+    echo ""
+    echo "Example:"
+    echo "  DEV_KEY=your_dev_key PROD_KEY=your_prod_key ./scripts/check-rls-simple.sh"
+    exit 1
+fi
 
 echo -e "${BLUE}🔍 RLS Policy Test Comparison${NC}"
 echo "====================================="
