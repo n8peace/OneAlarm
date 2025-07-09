@@ -44,14 +44,27 @@ jobs:
         # Get list of modified files in this PR/commit
         if [ "${{ github.event_name }}" = "pull_request" ]; then
           # For pull requests, check files changed
-          CHANGED_FILES=$(git diff --name-only origin/develop...HEAD)
+          CHANGED_FILES=$(git diff --name-only origin/develop...HEAD 2>/dev/null || echo "")
         else
-          # For direct pushes, check files changed in last commit
-          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+          # For direct pushes, try to get changed files
+          # First try to get the base branch
+          BASE_BRANCH="develop"
+          if git rev-parse origin/$BASE_BRANCH >/dev/null 2>&1; then
+            CHANGED_FILES=$(git diff --name-only origin/$BASE_BRANCH...HEAD 2>/dev/null || echo "")
+          else
+            # Fallback: check if we can get the previous commit
+            if git rev-parse HEAD~1 >/dev/null 2>&1; then
+              CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+            else
+              # This might be a new branch, skip the check
+              echo "⚠️ Cannot determine changed files, skipping hardcoded URL check"
+              CHANGED_FILES=""
+            fi
+          fi
         fi
         
         if [ -z "$CHANGED_FILES" ]; then
-          echo "⚠️ No changed files detected, skipping hardcoded URL check"
+          echo "⚠️ No changed files detected or cannot determine changes, skipping hardcoded URL check"
         else
           echo "📋 Changed files:"
           echo "$CHANGED_FILES"
