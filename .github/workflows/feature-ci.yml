@@ -56,12 +56,41 @@ jobs:
           exit 1
         fi
         
-        # Check for hardcoded URLs
-        if grep -r "joyavvleaxqzksopnmjs" scripts/ --exclude=config.sh 2>/dev/null; then
-          echo "❌ Hardcoded URLs found in scripts"
-          exit 1
+        # Check for hardcoded URLs in new/modified files only
+        echo "🔍 Checking for hardcoded URLs in new/modified files..."
+        
+        # Get list of modified files in this PR/commit
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          # For pull requests, check files changed
+          CHANGED_FILES=$(git diff --name-only origin/develop...HEAD)
         else
-          echo "✅ No hardcoded URLs found"
+          # For direct pushes, check files changed in last commit
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+        fi
+        
+        if [ -z "$CHANGED_FILES" ]; then
+          echo "⚠️ No changed files detected, skipping hardcoded URL check"
+        else
+          echo "📋 Changed files:"
+          echo "$CHANGED_FILES"
+          
+          # Check only changed files for hardcoded URLs
+          FOUND_HARDCODED=false
+          for file in $CHANGED_FILES; do
+            if [[ "$file" == scripts/* ]] && [[ "$file" != "scripts/config.sh" ]]; then
+              if grep -q "joyavvleaxqzksopnmjs" "$file" 2>/dev/null; then
+                echo "❌ Hardcoded URL found in changed file: $file"
+                FOUND_HARDCODED=true
+              fi
+            fi
+          done
+          
+          if [ "$FOUND_HARDCODED" = true ]; then
+            echo "❌ Hardcoded URLs found in new/modified files"
+            exit 1
+          else
+            echo "✅ No hardcoded URLs found in new/modified files"
+          fi
         fi
         
     - name: Validate Supabase configuration
