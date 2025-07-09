@@ -28,29 +28,7 @@ jobs:
         
     - name: Install Supabase CLI
       run: |
-        # Install Supabase CLI by downloading the binary directly
-        mkdir -p $HOME/.local/bin
-        
-        # Create temporary directory for download
-        TEMP_DIR=$(mktemp -d)
-        cd $TEMP_DIR
-        
-        # Download and extract to temporary directory
-        curl -L https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar xz
-        
-        # Move to final location (overwrite if exists)
-        mv -f supabase $HOME/.local/bin/
-        chmod +x $HOME/.local/bin/supabase
-        
-        # Clean up temporary directory
-        cd -
-        rm -rf $TEMP_DIR
-        
-        # Add to PATH
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-        
-        # Verify installation
-        $HOME/.local/bin/supabase --version
+        echo "⚠️ Skipping Supabase CLI install - handled by Supabase GitHub integration"
         
     - name: Validate environment variables
       run: |
@@ -124,38 +102,19 @@ jobs:
         
     - name: Link to development project
       run: |
-        echo "🔗 Linking to development Supabase project..."
-        # Set the access token for Supabase CLI authentication
-        export SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        supabase link --project-ref ${{ secrets.SUPABASE_DEV_PROJECT_REF }}
+        echo "⚠️ Skipping project link - handled by Supabase GitHub integration"
         
     - name: Deploy database migrations
       run: |
-        echo "🗄️ Deploying database migrations..."
-        echo "⚠️ Skipping database migrations for now - will be handled manually"
-        # TODO: Fix database connection issue
-        # supabase db push --linked
+        echo "⚠️ Skipping database migrations - handled by Supabase GitHub integration"
         
     - name: Deploy Edge Functions
       run: |
-        echo "⚡ Deploying Edge Functions..."
-        # Set the access token for Supabase CLI authentication
-        export SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        supabase functions deploy --project-ref ${{ secrets.SUPABASE_DEV_PROJECT_REF }} --branch develop
+        echo "⚠️ Skipping Edge Functions deploy - handled by Supabase GitHub integration"
         
     - name: Set environment variables
       run: |
-        echo "🔧 Setting environment variables..."
-        # Set the access token for Supabase CLI authentication
-        export SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        supabase secrets set --project-ref ${{ secrets.SUPABASE_DEV_PROJECT_REF }} --branch develop \
-          SUPABASE_URL=${{ secrets.SUPABASE_URL_DEV }} \
-          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY_DEV }} \
-          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY_DEV }} \
-          NEWSAPI_KEY=${{ secrets.NEWSAPI_KEY_DEV }} \
-          SPORTSDB_API_KEY=${{ secrets.SPORTSDB_API_KEY_DEV }} \
-          RAPIDAPI_KEY=${{ secrets.RAPIDAPI_KEY_DEV }} \
-          ABSTRACT_API_KEY=${{ secrets.ABSTRACT_API_KEY_DEV }}
+        echo "⚠️ Skipping environment variable set - handled by Supabase GitHub integration"
           
     - name: Run health checks
       run: |

@@ -2,15 +2,15 @@
 
 ## Overview
 
-This document describes the complete CI/CD pipeline for OneAlarm by SunriseAI, implementing a **GitHub → develop → main** workflow with proper testing, validation, and deployment stages.
+This document describes the complete CI/CD pipeline for OneAlarm by SunriseAI, implementing a **GitHub → develop → main** workflow with Supabase GitHub integration for automatic deployments.
 
 ## Workflow Architecture
 
 ```
 Feature Branch → Develop → Main
      ↓            ↓        ↓
-   Feature CI   Deploy   Deploy
-   (Testing)    (Dev)    (Prod)
+   Feature CI   Supabase  Supabase
+   (Testing)    (Preview) (Production)
 ```
 
 ## Branch Strategy
@@ -26,24 +26,38 @@ Feature Branch → Develop → Main
   - Configuration validation
 
 ### 2. Develop Branch
-- **Purpose**: Integration and testing environment
-- **Workflow**: `deploy-dev.yml`
+- **Purpose**: Preview environment for testing and integration
+- **Workflow**: `deploy-dev.yml` (validation only)
+- **Supabase Integration**: Automatic preview deployment
 - **Triggers**: Push to develop branch
 - **Actions**:
-  - Deploy to development Supabase project
-  - Run integration tests
-  - Health checks
   - Environment variable validation
+  - Health checks
+  - Integration tests
+  - **Supabase automatically deploys to preview environment**
 
 ### 3. Main Branch
 - **Purpose**: Production environment
-- **Workflow**: `deploy-prod.yml`
-- **Triggers**: Push to main branch (via promotion workflow)
+- **Workflow**: `deploy-prod.yml` (validation only)
+- **Supabase Integration**: Automatic production deployment
+- **Triggers**: Push to main branch
 - **Actions**:
-  - Deploy to production Supabase project
+  - Environment variable validation
   - Production health checks
-  - Database backup creation
-  - Rollback procedures
+  - **Supabase automatically deploys to production environment**
+
+## Supabase GitHub Integration
+
+### How It Works
+- **Supabase watches your GitHub repository** for branch changes
+- **Automatic deployments** happen when you push to `develop` or `main`
+- **Preview environments** are created for each branch automatically
+- **No manual deployment steps** needed in GitHub Actions
+
+### Environment Mapping
+- `develop` branch → Preview environment (for testing)
+- `main` branch → Production environment
+- Feature branches → Individual preview environments (if configured)
 
 ## Workflow Files
 
@@ -75,37 +89,29 @@ Feature Branch → Develop → Main
 - Security validation
 
 ### 3. `deploy-dev.yml`
-**Purpose**: Deploy to development environment
+**Purpose**: Validate development environment (no deployment)
 
 **Triggers**:
 - Push to `develop` branch
 - Manual workflow dispatch
 
-**Deployment Steps**:
-- Supabase CLI installation
+**Steps**:
 - Environment variable validation
-- Link to development project
-- Deploy Edge Functions
-- Set environment variables
 - Health checks
 - Integration tests
+- **No Supabase deployment (handled automatically)**
 
 ### 4. `deploy-prod.yml`
-**Purpose**: Deploy to production environment
+**Purpose**: Validate production environment (no deployment)
 
 **Triggers**:
 - Push to `main` branch
 - Manual workflow dispatch
 
-**Deployment Steps**:
-- Supabase CLI installation
+**Steps**:
 - Environment variable validation
-- Database backup creation
-- Link to production project
-- Deploy Edge Functions
-- Set environment variables
 - Production health checks
-- Rollback procedures
+- **No Supabase deployment (handled automatically)**
 
 ### 5. `promote-to-production.yml`
 **Purpose**: Promote code from develop to main
@@ -118,8 +124,7 @@ Feature Branch → Develop → Main
 - Check for uncommitted changes
 - Run production validation tests
 - Merge develop into main
-- Trigger production deployment
-- Create GitHub release (optional)
+- **Supabase automatically deploys to production**
 
 ## Environment Configuration
 
@@ -164,17 +169,28 @@ git push origin feature/new-feature
 # Create PR to develop when ready
 ```
 
-### 2. Development Deployment
+### 2. Development Testing
 ```bash
 # Merge feature branch to develop
 git checkout develop
 git merge feature/new-feature
 git push origin develop
 
-# This automatically triggers deploy-dev.yml
+# Supabase automatically deploys to preview environment
+# Check Supabase dashboard for preview URL
 ```
 
-### 3. Production Promotion
+### 3. Production Deployment
+```bash
+# Merge develop to main
+git checkout main
+git merge develop
+git push origin main
+
+# Supabase automatically deploys to production
+```
+
+### 4. Manual Production Promotion
 1. Go to GitHub Actions tab
 2. Select "Promote to Production" workflow
 3. Click "Run workflow"
@@ -221,16 +237,12 @@ git push origin develop
    - Check GitHub repository secrets
    - Verify secret names match workflow expectations
 
-2. **Supabase CLI Issues**
-   - Verify `SUPABASE_ACCESS_TOKEN` is valid
-   - Check project references are correct
-
-3. **Function Deployment Failures**
-   - Check function code for syntax errors
-   - Verify environment variables are set correctly
+2. **Supabase Deployment Issues**
+   - Check Supabase dashboard for deployment status
+   - Verify GitHub integration is properly configured
    - Check Supabase project limits
 
-4. **Health Check Failures**
+3. **Health Check Failures**
    - Verify function endpoints are accessible
    - Check authentication tokens
    - Review function logs in Supabase dashboard
@@ -244,17 +256,18 @@ git push origin develop
 2. **Production Rollback**
    - Use promotion workflow with previous commit
    - Or manually revert main branch
-   - Trigger production deployment
+   - Supabase automatically redeploys
 
 ## Best Practices
 
-1. **Always test in development first**
+1. **Always test in develop first**
 2. **Use meaningful commit messages**
 3. **Include release notes for production promotions**
 4. **Monitor health checks after deployments**
 5. **Keep feature branches small and focused**
 6. **Review code before merging to develop**
 7. **Test thoroughly before promoting to production**
+8. **Use Supabase dashboard to monitor deployments**
 
 ## Security Considerations
 
