@@ -2,7 +2,7 @@
 
 A personalized alarm clock app that generates custom morning audio content combining weather, news, sports, and stock information.
 
-## **✅ System Status: FULLY OPERATIONAL & SYNCHRONIZED**
+## **🚧 System Status: IN DEVELOPMENT**
 
 **Last Updated:** July 5, 2025  
 **Audio Generation:** Working perfectly with optimized queue processing  
@@ -319,3 +319,15 @@ See the `docs/` directory for comprehensive documentation including:
 - CI/CD implementation scope
 - Database schema and migrations
 - API documentation # CI/CD Pipeline Test - Wed Jul  9 16:28:45 PDT 2025
+
+---
+
+## 🛠️ Migration Sync & Repair (2025 Update)
+
+- If environments are in sync but migration tracking is not, use:
+  ```bash
+  supabase migration repair --status applied <migration_id>
+  ```
+  to mark migrations as applied without running them.
+- If a migration is marked as applied but the SQL was not executed (e.g., table still exists), manually run the migration SQL in the Supabase dashboard. Example: audio_files table removal.
+- Never reset production or re-run all migrations if the schema is already correct. Use migration repair for tracking, and manual SQL for any missed changes.
