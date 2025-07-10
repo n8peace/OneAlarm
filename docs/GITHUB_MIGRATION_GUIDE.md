@@ -277,3 +277,24 @@ Your OneAlarm project is now fully migrated to GitHub with comprehensive CI/CD c
 - ✅ Automated dependency updates
 
 The project is now ready for collaborative development and production deployment! 
+
+---
+
+## 🛠️ Migration Sync & Repair (2025 Update)
+
+**Production-Safe Migration Management:**
+- If your environments are already in sync but migration tracking is not, use:
+  ```bash
+  supabase migration repair --status applied <migration_id>
+  ```
+  to mark migrations as applied without running them.
+- This is the preferred approach for keeping develop and main in sync when the schema is already correct.
+
+**Manual SQL Execution (if needed):**
+- If a migration is marked as applied but the SQL was not executed (e.g., table still exists), manually run the migration SQL in the Supabase dashboard.
+- Example: If `audio_files` table removal migration was marked as applied but the table still exists, copy the SQL from `supabase/migrations/20250709000001_remove_audio_files_table.sql` and run it in the SQL editor for your main project.
+
+**Summary:**
+- Never reset production or re-run all migrations if the schema is already correct.
+- Use migration repair for tracking, and manual SQL for any missed changes.
+- This ensures safe, production-grade schema management with CI/CD. 
